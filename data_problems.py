@@ -27,7 +27,36 @@ def analyse_transactions(*transactions, **options):
             final_values += f"{key}: {value}\n"
 
     return final_values
-transactions = [1, 2, 3, 4, 5]
-print(analyse_transactions(*transactions, average=True, total=True))
+#transactions = [1, 2, 3, 4, 5]
+#print(analyse_transactions(*transactions, average=True, total=True))
 
-    
+# DATA CLEANING FUNCTION
+def clean_values(*values, **options):
+    operations = {
+        "remove_none": list(x for x in values if x is not None),
+        "remove_negative": list(x for x in values if x > 0),
+        "remove_duplicates": set(values),
+        "sort": list(values).sort()
+    }
+
+    res = {
+        name: func(values)
+        for name, func in operations.items()
+        if options.get(name, False)
+    }
+
+    if not res:
+        return values
+
+    return res
+
+    # getting ahead of myself with some tricky stuff
+    # will attempt to provide a redundant solution before cleaning up result
+
+print(clean_values(
+    10, None, 20, -5, 20, 30,
+    remove_none=True,
+    remove_negative=True,
+    remove_duplicates=True,
+    sort=True
+))
