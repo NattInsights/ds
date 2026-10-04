@@ -46,10 +46,42 @@ def clean_values(*values, **options):
     # simplified implementation dramatically, not most efficient at all
     # but it works :)
     # took me longer than it should have by a country mile
-print(clean_values(
+"""print(clean_values(
     10, None, 20, -5, 20, 30,
     remove_none=True,
     remove_negative=True,
     remove_duplicates=True,
     sort=True
-))
+))"""
+
+# ANALYSE DATASET
+def analyse_dataset(*values, **options):
+    if options.get("total", False): 
+        total = sum(values)
+    if options.get("average", False):
+        avg = round(sum(values) / len(values), 2)
+    if options.get("average", False):
+        median = sum(values) / len(values)
+    if options.get("minimum", False):
+        min = min(values)
+    if options.get("maximum", False):
+        max = max(values)
+    if options.get("unique", False):
+        unique = list(x for x in values if values.count(x) > 1)
+    if options.get("sort", False):
+        values.sort()
+    return total
+    # i think i should change this to a dictionary with functions for each value
+data = [12, 15, 18, 21, 15, 30, 42, 18, 25]
+"""print(analyse_dataset(
+    *data,
+    total=True, 
+    average=True, 
+    median=True, 
+    minimum=True, 
+    maximum=True, 
+    unique=True, 
+    sort=True 
+    ))"""
+print(tuple(*data, sep=", "))
+
