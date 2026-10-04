@@ -32,27 +32,20 @@ def analyse_transactions(*transactions, **options):
 
 # DATA CLEANING FUNCTION
 def clean_values(*values, **options):
-    operations = {
-        "remove_none": list(x for x in values if x is not None),
-        "remove_negative": list(x for x in values if x > 0),
-        "remove_duplicates": set(values),
-        "sort": list(values).sort()
-    }
+    cleaned = list(values)
 
-    res = {
-        name: func(values)
-        for name, func in operations.items()
-        if options.get(name, False)
-    }
-
-    if not res:
-        return values
-
-    return res
-
-    # getting ahead of myself with some tricky stuff
-    # will attempt to provide a redundant solution before cleaning up result
-
+    if options.get("remove_none", False):
+        cleaned = list(x for x in cleaned if x is not None)
+    if options.get("remove_negative", False):
+       cleaned = list(x for x in cleaned if (x  is None) or (x >= 0))
+    if options.get("remove_duplicates", False):
+        cleaned = list(set(cleaned))
+    if options.get("sort", False):
+        cleaned.sort(key=lambda x: x is not None)
+    return cleaned
+    # simplified implementation dramatically, not most efficient at all
+    # but it works :)
+    # took me longer than it should have by a country mile
 print(clean_values(
     10, None, 20, -5, 20, 30,
     remove_none=True,
