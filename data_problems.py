@@ -1,3 +1,5 @@
+from statistics import median
+
 # CUSTOMER TRANSACION ANALYSER
 def analyse_transactions(*transactions, **options):
     avg_request = options.get("average", False)
@@ -56,7 +58,29 @@ def clean_values(*values, **options):
 
 # ANALYSE DATASET
 def analyse_dataset(*values, **options):
-    if options.get("total", False): 
+    list_values = list(values)
+    operations = {
+        "total": lambda x: sum(x),
+        "average": lambda x: round(sum(x) / len(x), 2),
+        "median": lambda x: median(x),
+        "minimum": lambda x: min(x),
+        "maximum": lambda x: max(x),
+        "unique": lambda x: list(set(x)),
+        "sort": lambda x: sorted(x)
+    }
+
+    results = {
+        name: func(list_values)
+        for name, func in operations.items()
+        if options.get(name, False)
+    }
+
+    if not results:
+        return "No evaluations have been made"
+
+    return "\n".join(f"{k}: {v}" for k, v in results.items())
+        
+    """if options.get("total", False): 
         total = sum(values)
     if options.get("average", False):
         avg = round(sum(values) / len(values), 2)
@@ -69,19 +93,17 @@ def analyse_dataset(*values, **options):
     if options.get("unique", False):
         unique = list(x for x in values if values.count(x) > 1)
     if options.get("sort", False):
-        values.sort()
-    return total
+        values.sort()"""
     # i think i should change this to a dictionary with functions for each value
 data = [12, 15, 18, 21, 15, 30, 42, 18, 25]
-"""print(analyse_dataset(
+print(analyse_dataset(
     *data,
     total=True, 
-    average=True, 
+    average=True,
     median=True, 
     minimum=True, 
     maximum=True, 
     unique=True, 
     sort=True 
-    ))"""
-print(tuple(*data, sep=", "))
+    ))
 
