@@ -96,7 +96,7 @@ def analyse_dataset(*values, **options):
         values.sort()"""
     # i think i should change this to a dictionary with functions for each value
 data = [12, 15, 18, 21, 15, 30, 42, 18, 25]
-print(analyse_dataset(
+"""print(analyse_dataset(
     *data,
     total=True, 
     average=True,
@@ -105,5 +105,18 @@ print(analyse_dataset(
     maximum=True, 
     unique=True, 
     sort=True 
-    ))
+    ))"""
+
+# FUNCTION-BASED DATA PIPELINE
+def process_data(data, *operations):
+    return None
+
+def remove_negatives(data):
+    return [x for x in data if x >= 0]
+
+def square_values(data):
+    return [x**2 for x in data]
+
+def sort_values(data):
+    return sorted(data)
 
