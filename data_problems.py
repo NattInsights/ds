@@ -119,6 +119,8 @@ def process_data(data, *operations):
     for func, wrapper in calculations.items():
         if func in operations:
             processed_data = wrapper(processed_data)"""
+    # i am fully aware that my version above is extremely double winded
+    # noticed it when i saw the function itself was in the operations tuple and not a string
 
     processed_data = data
     for operation in operations:
@@ -135,10 +137,35 @@ def square_values(data):
 def sort_values(data):
     return sorted(data)
 
-result = process_data(
+"""result = process_data(
     [-4, 3, -2, 7, 1],
     remove_negatives,
     square_values,
     sort_values
+)
+print(result)"""
+
+# CUSTOM FILTER AND TRANSFORM
+def transform_data(data, filter_func=None, transform_func=None):
+    transformed_data = data
+
+    for num in transformed_data:
+        if filter_func(num) == False and filter_func is not None:
+            transformed_data.remove(num)
+
+    transformed_data = [transform_func(num) 
+                        for num in transformed_data 
+                        if transform_func is not None]
+    
+    return transformed_data
+    # bunch of silliness below in fact
+
+
+numbers = [1, 2, 3, 4, 5, 6]
+
+result = transform_data(
+    numbers,
+    filter_func=lambda x: x % 2 == 0,
+    transform_func=lambda x: x ** 2
 )
 print(result)
