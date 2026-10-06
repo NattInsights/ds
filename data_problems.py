@@ -109,7 +109,22 @@ data = [12, 15, 18, 21, 15, 30, 42, 18, 25]
 
 # FUNCTION-BASED DATA PIPELINE
 def process_data(data, *operations):
-    return None
+    """calculations = {
+        remove_negatives: lambda x: remove_negatives(x),
+        square_values: lambda x: square_values(x),
+        sort_values: lambda x: sort_values(x)
+    }
+
+    processed_data = data
+    for func, wrapper in calculations.items():
+        if func in operations:
+            processed_data = wrapper(processed_data)"""
+
+    processed_data = data
+    for operation in operations:
+        processed_data = operation(processed_data)
+
+    return processed_data
 
 def remove_negatives(data):
     return [x for x in data if x >= 0]
@@ -120,3 +135,10 @@ def square_values(data):
 def sort_values(data):
     return sorted(data)
 
+result = process_data(
+    [-4, 3, -2, 7, 1],
+    remove_negatives,
+    square_values,
+    sort_values
+)
+print(result)
