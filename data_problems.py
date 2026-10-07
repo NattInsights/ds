@@ -169,42 +169,27 @@ result = transform_data(
 print(result)"""
 
 def generate_report(sales, **options):
-    comparison = []
-    categories = []
-    revenue = 0
-    for sale in sales:
-        product = sale["product"]
-        category = sale["category"]
-        price = sale["price"]
-        quantity = sale["quantity"]
+    # compute single aggregates
+    revenue = sum(s["price"] * s["quantity"] for s in sales)
+    average = round(revenue / len(sales), 2)
+    category_summary = {s["category"] for s in sales}
 
-        categories.append(category)
-        revenue += price * quantity
-        comparison.append(price)
+    highest_price = max(sales, key= lambda s: s["price"])["price"]
+    best_product = [s["product"] for s in sales if s["price"] == highest_price]
 
-        best_product = [key for key, value in sale.items() 
-                        if value == max(comparison)]
-
-    average = round(revenue / len(sales), 1)
-    category_summary = list(set(categories))
-     
-
-    """calculations = {
+    calculations = {
         "revenue": lambda: revenue,
+        "average_order": lambda: average,
         "category_summary": lambda: category_summary,
-        "best_product": 
-    }"""
+        "best_product": lambda: best_product
+    }
 
-    """res = {
+    return {
         name: func()
         for name, func in calculations.items()
         if options.get(name, False)
-    }"""
-
-    return comparison
-
-
-
+    }
+    
 sales = [
     {"product": "Laptop", "category": "Tech", "price": 800, "quantity": 2},
     {"product": "Mouse", "category": "Tech", "price": 25, "quantity": 10},
