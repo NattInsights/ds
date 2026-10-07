@@ -158,14 +158,62 @@ def transform_data(data, filter_func=None, transform_func=None):
                         if transform_func is not None]
     
     return transformed_data
-    # bunch of silliness below in fact
 
-
-numbers = [1, 2, 3, 4, 5, 6]
+"""numbers = [1, 2, 3, 4, 5, 6]
 
 result = transform_data(
     numbers,
     filter_func=lambda x: x % 2 == 0,
     transform_func=lambda x: x ** 2
 )
-print(result)
+print(result)"""
+
+def generate_report(sales, **options):
+    comparison = []
+    categories = []
+    revenue = 0
+    for sale in sales:
+        product = sale["product"]
+        category = sale["category"]
+        price = sale["price"]
+        quantity = sale["quantity"]
+
+        categories.append(category)
+        revenue += price * quantity
+        comparison.append(price)
+
+        best_product = [key for key, value in sale.items() 
+                        if value == max(comparison)]
+
+    average = round(revenue / len(sales), 1)
+    category_summary = list(set(categories))
+     
+
+    """calculations = {
+        "revenue": lambda: revenue,
+        "category_summary": lambda: category_summary,
+        "best_product": 
+    }"""
+
+    """res = {
+        name: func()
+        for name, func in calculations.items()
+        if options.get(name, False)
+    }"""
+
+    return comparison
+
+
+
+sales = [
+    {"product": "Laptop", "category": "Tech", "price": 800, "quantity": 2},
+    {"product": "Mouse", "category": "Tech", "price": 25, "quantity": 10},
+    {"product": "Desk", "category": "Furniture", "price": 200, "quantity": 3},
+]
+print(generate_report(
+    sales,
+    revenue=True,
+    category_summary=True,
+    best_product=True,
+    average_order=True
+))
