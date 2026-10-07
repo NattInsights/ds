@@ -1,4 +1,4 @@
-from statistics import median
+from statistics import median, mean, stdev
 
 # CUSTOMER TRANSACION ANALYSER
 def analyse_transactions(*transactions, **options):
@@ -190,7 +190,7 @@ def generate_report(sales, **options):
         if options.get(name, False)
     }
     
-sales = [
+"""sales = [
     {"product": "Laptop", "category": "Tech", "price": 800, "quantity": 2},
     {"product": "Mouse", "category": "Tech", "price": 25, "quantity": 10},
     {"product": "Desk", "category": "Furniture", "price": 200, "quantity": 3},
@@ -201,4 +201,19 @@ print(generate_report(
     category_summary=True,
     best_product=True,
     average_order=True
-))
+))"""
+
+# MINI DATA ANALYSIS FRAMEWORK
+#def analyse_dataset(data, *operations, **options):
+
+data = [5, 8, 2, 12, 476]
+
+def sort_data(data):
+    return sorted(data)
+
+def remove_outliers(data):
+    m = mean(data)
+    upper = m + (3 * stdev(data))
+    lower = m - (3 * stdev(data))
+    return [x for x in data if x >= lower and x <= upper] 
+print(remove_outliers(data))
