@@ -1,4 +1,5 @@
 from statistics import median, mean, stdev
+from numpy import quantile
 
 # CUSTOMER TRANSACION ANALYSER
 def analyse_transactions(*transactions, **options):
@@ -206,15 +207,17 @@ print(generate_report(
 # MINI DATA ANALYSIS FRAMEWORK
 #def analyse_dataset(data, *operations, **options):
 
-data = [12, 15, 18, 21, 25, 30, 31, 40, 200]
+data = [12, 15, 18, 21, 25, 30, 31, 40]
 
 def sort_data(data):
     return sorted(data)
 
 def remove_outliers(data):
-    m = mean(data)
-    s = stdev(data)
-    # attempting z scores
-    return [x for x in data if abs((x- m)/ s <= 3)]
-    
+    Q1 = quantile(data, 0.25)
+    Q3 = quantile(data, 0.75)
+    IQR = Q3 -Q1
+    # z score isnt good for small datasets, due to skewness
+    # good for large datasets with typically bell curve shapes
+    return [x for x in data if (x >= Q1 - 1.5*IQR and x <= Q3 + 1.5*IQR)]
+    #return Q3 + 1.5*IQR
 print(remove_outliers(data))
