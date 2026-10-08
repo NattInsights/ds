@@ -206,14 +206,15 @@ print(generate_report(
 # MINI DATA ANALYSIS FRAMEWORK
 #def analyse_dataset(data, *operations, **options):
 
-data = [5, 8, 2, 12, 476]
+data = [12, 15, 18, 21, 25, 30, 31, 40, 200]
 
 def sort_data(data):
     return sorted(data)
 
 def remove_outliers(data):
     m = mean(data)
-    upper = m + (3 * stdev(data))
-    lower = m - (3 * stdev(data))
-    return [x for x in data if x >= lower and x <= upper] 
+    s = stdev(data)
+    # attempting z scores
+    return [x for x in data if abs((x- m)/ s <= 3)]
+    
 print(remove_outliers(data))
