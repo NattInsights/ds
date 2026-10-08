@@ -58,7 +58,7 @@ def clean_values(*values, **options):
 ))"""
 
 # ANALYSE DATASET
-def analyse_dataset(*values, **options):
+"""def analyse_dataset(*values, **options):
     list_values = list(values)
     operations = {
         "total": lambda x: sum(x),
@@ -81,7 +81,7 @@ def analyse_dataset(*values, **options):
 
     return "\n".join(f"{k}: {v}" for k, v in results.items())
         
-    """if options.get("total", False): 
+    if options.get("total", False): 
         total = sum(values)
     if options.get("average", False):
         avg = round(sum(values) / len(values), 2)
@@ -94,10 +94,10 @@ def analyse_dataset(*values, **options):
     if options.get("unique", False):
         unique = list(x for x in values if values.count(x) > 1)
     if options.get("sort", False):
-        values.sort()"""
-    # i think i should change this to a dictionary with functions for each value
+        values.sort()
+     i think i should change this to a dictionary with functions for each value
 data = [12, 15, 18, 21, 15, 30, 42, 18, 25]
-"""print(analyse_dataset(
+print(analyse_dataset(
     *data,
     total=True, 
     average=True,
@@ -205,9 +205,38 @@ print(generate_report(
 ))"""
 
 # MINI DATA ANALYSIS FRAMEWORK
-#def analyse_dataset(data, *operations, **options):
+def analyse_dataset(data, *operations, **options):
+    calculations = {
+        "total": lambda x: sum(x),
+        "average": lambda x: round(sum(x)/ len(x), 1),
+        "median": lambda x: median(x),
+        "minimum": lambda x: min(x),
+        "maximum": lambda x: max(x)
+    }  
 
-data = [12, 15, 18, 21, 25, 30, 31, 40]
+    calc_res = {
+        name: func(data)
+        for name, func in calculations.items()
+        if options.get(name, False)
+    }
+
+    operation_names = {op.__name__ for op in operations}
+    func_calculations = {
+        "remove_outliers": lambda: remove_outliers(data),
+        "normalise": lambda: normalise(data),
+        "sort_data": lambda: sort_data(data)
+    }
+
+    func_res = {
+        name: func()
+        for name, func in func_calculations.items()
+        if name in operation_names
+    }
+
+    final_calc = "Calculations:\n" + "\n".join(f"{k} - {v}" for k, v in calc_res.items())
+    final_func = "Operations:\n" + "\n".join(f"{k} - {v}" for k, v in func_res.items())
+
+    return final_calc + "\n" + final_func
 
 def normalise(data):
     # after exploring four main normalisation techniques
@@ -218,8 +247,7 @@ def normalise(data):
     Q1 = quantile(data, 0.25)
     Q3 = quantile(data, 0.75)
     IQR = Q3 - Q1
-    return [abs((x - med)/ IQR) for x in data]
-    
+    return [float(round((x - med)/ IQR, 2)) for x in data]
 
 def sort_data(data):
     return sorted(data)
@@ -232,4 +260,14 @@ def remove_outliers(data):
     # good for large datasets with typically bell curve shapes
     return [x for x in data if (x >= Q1 - 1.5*IQR and x <= Q3 + 1.5*IQR)]
     #return Q3 + 1.5*IQR
-print(normalise(data))
+data = [12, 15, 18, 21, 25, 30, 31, 51]
+print(analyse_dataset(
+    data,
+    remove_outliers,
+    normalise,
+    sort_data,
+    total=True,
+    average=True,
+    median=True,
+    minimum=True,
+    maximum=True))
