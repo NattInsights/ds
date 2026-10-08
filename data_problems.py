@@ -209,6 +209,18 @@ print(generate_report(
 
 data = [12, 15, 18, 21, 25, 30, 31, 40]
 
+def normalise(data):
+    # after exploring four main normalisation techniques
+    # min-max scaling (0-1 norm), l2 normalisation (vector norm), 
+    # robust scaling (median + IQR), standardisation (z-score norm)
+    # have surmised that robust scaling is most suited here
+    med = median(data)
+    Q1 = quantile(data, 0.25)
+    Q3 = quantile(data, 0.75)
+    IQR = Q3 - Q1
+    return [abs((x - med)/ IQR) for x in data]
+    
+
 def sort_data(data):
     return sorted(data)
 
@@ -220,4 +232,4 @@ def remove_outliers(data):
     # good for large datasets with typically bell curve shapes
     return [x for x in data if (x >= Q1 - 1.5*IQR and x <= Q3 + 1.5*IQR)]
     #return Q3 + 1.5*IQR
-print(remove_outliers(data))
+print(normalise(data))
