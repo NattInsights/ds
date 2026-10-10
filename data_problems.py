@@ -1,5 +1,6 @@
 from statistics import median, mean, stdev
 from numpy import quantile
+from collections import Counter
 
 # CUSTOMER TRANSACION ANALYSER
 def analyse_transactions(*transactions, **options):
@@ -274,45 +275,71 @@ print(analyse_dataset(
 
 # CUSTOMER CHURN ANALYSER
 def analyse_churn(customers, *operations, **options):
-    basic_count = 0
-    prem_count = 0
-    churn_basic = (c for c in customers if c["plan"] == "Basic" and c["churned"] == True)
-    churn_prem = sum(c["churned"] == True for c in customers if c["plan"] == "Premium")
-
-    ops_calc = {
-        "churn_rate": lambda x: x["churned"],
-        "average_days_since_login": lambda x: round(x["days_since_login"] / x["logins"], 1),
-        #"churn_by_plan": lambda x: 
+    churn_counts = Counter(
+        c["plan"]
+        for c in customers
+        if c["churned"]
+    )
+    
+    churn_by_plan = {
+        plan: count
+        for plan, count in churn_counts.items()
     }
 
-    return churn_basic
+    churn_rate_count = Counter (
+        c["churned"]
+        for c in customers
+        if c["churned"] == True
+    )
+
+    churn_rate = list(churn_rate_count.values())[0]
+
+    average_days_since_login = {
+    f"customer_id {c["id"]}": round(c["days_since_login"] / c["logins"], 1)
+    for c in customers
+    }
+
+    ops_calc = {
+        "churn_rate": lambda: churn_rate,
+        "average_days_since_login": lambda: average_days_since_login,
+        "churn_by_plan": lambda: churn_by_plan
+    }
+
+    res = {
+        name: func()
+        for name, func in ops_calc.items()
+        if options.get(name, False)
+    }
+
+    return "\n".join(f"{k}: {v}" for k,v in res.items())
 
 customers = [
-    {
+        {
         "id": 1,
         "age": 24,
         "logins": 3,
         "days_since_login": 45,
         "plan": "Basic",
-        "churned": True
+        "churned": False
     },
-    """{
+    {
         "id": 2,
-        "age": 31,
+        "age": 45,
         "logins": 8,
-        "days_since_login": 82,
-        "plan": "Basic",
+        "days_since_login": 3,
+        "plan": "Premium",
         "churned": True
     },
     {
-            "id": 2,
+            "id": 3,
             "age": 31,
             "logins": 8,
             "days_since_login": 82,
             "plan": "Basic",
             "churned": True
-        }"""
+        }
 ]
+
 print(analyse_churn(
     customers,
     churn_rate=True,
