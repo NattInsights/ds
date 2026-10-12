@@ -260,7 +260,7 @@ def remove_outliers(data):
     # good for large datasets with typically bell curve shapes
     return [x for x in data if (x >= Q1 - 1.5*IQR and x <= Q3 + 1.5*IQR)]
     #return Q3 + 1.5*IQR
-data = [12, 15, 18, 21, 25, 30, 31, 51]
+"""data = [12, 15, 18, 21, 25, 30, 31, 51]
 print(analyse_dataset(
     data,
     remove_outliers,
@@ -270,4 +270,52 @@ print(analyse_dataset(
     average=True,
     median=True,
     minimum=True,
-    maximum=True))
+    maximum=True))"""
+
+# CUSTOMER CHURN ANALYSER
+def analyse_churn(customers, *operations, **options):
+    basic_count = 0
+    prem_count = 0
+    churn_basic = (c for c in customers if c["plan"] == "Basic" and c["churned"] == True)
+    churn_prem = sum(c["churned"] == True for c in customers if c["plan"] == "Premium")
+
+    ops_calc = {
+        "churn_rate": lambda x: x["churned"],
+        "average_days_since_login": lambda x: round(x["days_since_login"] / x["logins"], 1),
+        #"churn_by_plan": lambda x: 
+    }
+
+    return churn_basic
+
+customers = [
+    {
+        "id": 1,
+        "age": 24,
+        "logins": 3,
+        "days_since_login": 45,
+        "plan": "Basic",
+        "churned": True
+    },
+    """{
+        "id": 2,
+        "age": 31,
+        "logins": 8,
+        "days_since_login": 82,
+        "plan": "Basic",
+        "churned": True
+    },
+    {
+            "id": 2,
+            "age": 31,
+            "logins": 8,
+            "days_since_login": 82,
+            "plan": "Basic",
+            "churned": True
+        }"""
+]
+print(analyse_churn(
+    customers,
+    churn_rate=True,
+    average_days_since_login=True,
+    churn_by_plan=True
+))
