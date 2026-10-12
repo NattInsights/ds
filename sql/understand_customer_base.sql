@@ -24,9 +24,34 @@ GROUP BY gender;
 
 -- Subscription performance
 -- Which sub type has the highest churn rate?
-SELECT subscription_type,
-    ROUND(100.0 * COUNT(CASE WHEN churn = 1 THEN 1 END)
-    / COUNT(customer_id), 2)
-    AS percent_churned
+SELECT subscription_type AS "Subscription Type",
+    COUNT(*) AS "Total Customers",
+   SUM(churn) AS "Churned Customers",
+    ROUND(AVG(churn) * 100, 2)
+    AS "Churn rate (%)"
 FROM customers
 GROUP BY subscription_type;
+
+-- CUSTOMER TENURE
+-- What is the average customer tenure for churned customers versus retained customers?
+-- Is there an apparent difference in how long each group has been with the company?
+WITH customer_status AS (
+    SELECT
+        CASE 
+            WHEN churn = 1 THEN 'Churned'  
+            WHEN churn = 0 THEN 'Retained'
+            ELSE 'Unknown'
+        END AS churn_type,
+        tenure
+    FROM customers
+)
+SELECT
+    churn_type AS "Churn Type",
+    COUNT(*) AS "Total Customers",
+    ROUND(AVG(tenure), 2) AS "Average Tenure"
+FROM customer_status
+GROUP BY churn_type;
+
+
+
+
