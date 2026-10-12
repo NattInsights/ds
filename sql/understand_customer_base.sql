@@ -52,6 +52,26 @@ SELECT
 FROM customer_status
 GROUP BY churn_type;
 
+-- Spending patterns
+-- What is the average and total customer spend for churned and retained customers?
+-- Which group accounts for more total spend in the dataset?
+WITH customer_spend AS(
+    SELECT
+        CASE
+            WHEN churn = 0 THEN 'Churned'
+            WHEN churn = 1 THEN 'Retained'
+            ELSE 'Unknown'
+        END AS churn_type,
+        total_spend
+    FROM customers
+)
+SELECT churn_type AS "Churn Type",
+    TO_CHAR(SUM(total_spend), 'FM999,999,999,990.00') AS "Total Spend",
+    ROUND(AVG(total_spend), 2) AS "Average Spend"
+FROM customer_spend
+GROUP BY churn_type;
+
+
 
 
 
