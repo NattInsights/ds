@@ -71,7 +71,10 @@ SELECT churn_type AS "Churn Type",
 FROM customer_spend
 GROUP BY churn_type;
 
--- Payment delays and retention
+/* Payment delays and retention
+Is payment delay associated with churn?
+Group customers into delay bands (0–5, 6–10, 11–20, 21+ days) and compare their churn rates
+*/
 WITH payment_delays AS (
     SELECT
         CASE
@@ -90,6 +93,23 @@ SELECT
 FROM payment_delays
 GROUP BY delay_bands;
 
+/* Low engagement customers
+The product team suspects that infrequent usage and long periods without interaction are warning signs.
+Compare churn rates for customers with usage frequency below versus above the dataset's median.
+Also investigate whether customers with more than 14 days since their last interaction have higher churn.
+*/
+SELECT ROUND(AVG(usage_frequency), 1) AS median_usage_frequency
+FROM (
+    SELECT
+        usage_frequency,
+        ROW_NUMBER() OVER (ORDER BY usage_frequency) AS rn,
+        COUNT(*) OVER() AS total
+    FROM customers 
+) t
+WHERE rn IN ((total + 1) / 2);
+-- need to learn subqueries and window functions
+-- to effectively calculate the median
+-- not sure what the above does currently
 
 
 
