@@ -71,6 +71,24 @@ SELECT churn_type AS "Churn Type",
 FROM customer_spend
 GROUP BY churn_type;
 
+-- Payment delays and retention
+WITH payment_delays AS (
+    SELECT
+        CASE
+            WHEN payment_delay BETWEEN 0 AND 5 THEN 'Very low (0-5)'
+            WHEN payment_delay BETWEEN 6 AND 10 THEN 'Low (6-10)'
+            WHEN payment_delay BETWEEN 11 AND 20 THEN 'Moderate (11-20)'
+            WHEN payment_delay >= 21 THEN 'High (21+)'
+        END AS delay_bands,
+        churn
+    FROM customers
+)
+SELECT
+    delay_bands AS "Payment delay bands",
+    COUNT(*) AS "No. of Customers",
+    TO_CHAR(ROUND(AVG(churn) * 100, 1), 'FM99.0%') AS "Churn rate"
+FROM payment_delays
+GROUP BY delay_bands;
 
 
 
