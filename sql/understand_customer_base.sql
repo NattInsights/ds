@@ -96,20 +96,23 @@ GROUP BY delay_bands;
 /* Low engagement customers
 The product team suspects that infrequent usage and long periods without interaction are warning signs.
 Compare churn rates for customers with usage frequency below versus above the dataset's median.
-Also investigate whether customers with more than 14 days since their last interaction have higher churn.
 */
-SELECT ROUND(AVG(usage_frequency), 1) AS median_usage_frequency
-FROM (
-    SELECT
-        usage_frequency,
-        ROW_NUMBER() OVER (ORDER BY usage_frequency) AS rn,
-        COUNT(*) OVER() AS total
-    FROM customers 
-) t
-WHERE rn IN ((total + 1) / 2);
--- need to learn subqueries and window functions
--- to effectively calculate the median
--- not sure what the above does currently
+WITH median_value AS (SELECT
+        PERCENTILE_CONT(0.5)
+        WITHIN GROUP (ORDER BY usage_frequency) AS median_usage
+    FROM customers
+)
+SELECT 
+    CASE
+        WHEN usage_frequency < median_usage THEN 'Low usage'
+        ELSE 'Higher usage'
+    END AS usage_group,
+    COUNT(*) AS total_customers,
+    ROUND(AVG(churn) * 100, 1) AS churn_rate
+FROM customers
+CROSS JOIN median_value
+GROUP BY usage_group;
+-- a lot to unpack here
 
 
 
