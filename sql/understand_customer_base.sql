@@ -126,6 +126,9 @@ HAVING COUNT(*) > 100
 ORDER BY churn_rate DESC;
 
 -- High-value churn
+-- The revenue team wants to understand whether customers who spend more are being retained.
+-- Divide customers into four equally sized spending groups using quartiles. 
+-- Compare churn rates and average tenure across those groups.
 SELECT
     monthly_spend_bands,
     MIN(total_spend) AS min_spend,
