@@ -32,13 +32,14 @@ bands AS (
             ELSE 'High no. of delays'
         END AS delay_bands,
         c.churn
-    FROM customers AS c
+    FROM customers c
     CROSS JOIN medians m
 )
 SELECT usage_bands,
     support_bands,
     delay_bands,
+    -- CONCAT(usage_bands, ' / ', support_bands, ' / ', delay_bands) AS segment,
     ROUND(AVG(churn) * 100, 1) AS churn_rate
 FROM bands
 GROUP BY usage_bands, support_bands, delay_bands
-ORDER BY churn_rate DESC;
+ORDER BY usage_bands DESC;
