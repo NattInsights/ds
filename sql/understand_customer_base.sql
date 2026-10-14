@@ -122,7 +122,11 @@ SELECT ROUND(AVG(churn) * 100, 1) AS churn_rate,
     contract_length
 FROM customers
 GROUP BY subscription_type, contract_length
-HAVING COUNT(*) > 100;
+HAVING COUNT(*) > 100
+ORDER BY churn_rate DESC;
+
+-- High-value churn
+
 
 
 
