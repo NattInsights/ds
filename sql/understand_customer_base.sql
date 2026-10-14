@@ -114,5 +114,15 @@ CROSS JOIN median_value
 GROUP BY usage_group;
 -- a lot to unpack here
 
+-- Contract length and subscription type
+-- Which combination of subscription type and contract length has the highest churn rate?
+-- Only report combinations with at least 100 customers, so that small groups do not dominate the results.
+SELECT ROUND(AVG(churn) * 100, 1) AS churn_rate,
+    subscription_type,
+    contract_length
+FROM customers
+GROUP BY subscription_type, contract_length
+HAVING COUNT(*) > 100;
+
 
 
