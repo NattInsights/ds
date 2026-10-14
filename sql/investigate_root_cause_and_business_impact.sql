@@ -42,4 +42,4 @@ SELECT usage_bands,
     ROUND(AVG(churn) * 100, 1) AS churn_rate
 FROM bands
 GROUP BY usage_bands, support_bands, delay_bands
-ORDER BY usage_bands DESC;
+ORDER BY usage_bands, support_bands;
