@@ -126,6 +126,23 @@ HAVING COUNT(*) > 100
 ORDER BY churn_rate DESC;
 
 -- High-value churn
+SELECT
+    monthly_spend_bands,
+    MIN(total_spend) AS min_spend,
+    MAX(total_spend) AS max_spend,
+    COUNT(*) AS customers_in_band,
+    ROUND(AVG(churn) * 100, 1) AS churn_rates,
+    ROUND(AVG(tenure), 1) AS avg_tenure
+FROM (
+    SELECT
+        NTILE(4) OVER(ORDER BY total_spend) AS monthly_spend_bands,
+        churn,
+        tenure,
+        total_spend
+    FROM customers
+)
+GROUP BY monthly_spend_bands
+ORDER BY churn_rates DESC; 
 
 
 
