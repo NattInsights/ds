@@ -42,3 +42,8 @@ SELECT usage_bands,
     ROUND(AVG(churn) * 100, 1) AS churn_rate
 FROM bands
 GROUP BY usage_bands, support_bands, delay_bands;
+
+/* Separate tenure effects from subscription effects
+The team believes monthly contracts churn more frequently.
+Compare churn rates by contract length within each tenure band (for example, 0–12, 13–24, 25–36, 37+ months).
+Does the contract pattern persist across tenure groups?
