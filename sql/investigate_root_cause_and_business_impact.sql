@@ -36,10 +36,9 @@ bands AS (
     CROSS JOIN medians m
 )
 SELECT usage_bands,
-    support_bands,
+    support_bands, 
     delay_bands,
-    -- CONCAT(usage_bands, ' / ', support_bands, ' / ', delay_bands) AS segment,
+    CONCAT(usage_bands, ' / ', support_bands, ' / ', delay_bands) AS segment,
     ROUND(AVG(churn) * 100, 1) AS churn_rate
 FROM bands
-GROUP BY usage_bands, support_bands, delay_bands
-ORDER BY usage_bands, support_bands;
+GROUP BY usage_bands, support_bands, delay_bands;
