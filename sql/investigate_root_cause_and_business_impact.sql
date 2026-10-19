@@ -85,3 +85,57 @@ FROM (
 )
 GROUP BY subscription_type, contract_length
 ORDER BY subscription_type, contract_length;
+
+/* Find the strongest churn indicators
+Compare churn rates across customer groups defined by support calls, usage frequency, payment delays, and time since last interaction.
+Rank the resulting segments by their difference in churn rate from the overall baseline.
+*/
+
+WITH s_calls AS (
+    SELECT
+        CASE WHEN support_calls BETWEEN 0 AND 2 THEN 'Very Low calls'
+            WHEN support_calls BETWEEN 3 AND 4 THEN 'Low calls'
+            WHEN support_calls BETWEEN 5 AND 6 THEN 'Moderate calls'
+            WHEN support_calls >= 7 THEN 'High calls'
+            ELSE 'Not found'
+        END AS support_calls_band,
+        churn,
+        customer_id
+    FROM customers
+),
+u_frequency AS (
+    SELECT
+        CASE WHEN usage_frequency BETWEEN 0 AND 5 THEN 'Very Low Frequency'
+            WHEN usage_frequency BETWEEN 6 AND 12 THEN 'Low Frequency'
+            WHEN usage_frequency BETWEEN 13 AND 20 THEN 'Moderate Frequency'
+            WHEN usage_frequency >= 21 THEN 'High Frequency'
+            ELSE 'Not found'
+        END AS usage_frequency_band,
+        customer_id
+    FROM customers
+),
+p_delays AS (
+    SELECT
+        CASE WHEN payment_delay BETWEEN 0 AND 5 THEN 'Very Low delays'
+            WHEN payment_delay BETWEEN 6 AND 12 THEN 'Low delays'
+            WHEN payment_delay BETWEEN 13 AND 20 THEN 'Moderate delays'
+            WHEN payment_delay >= 21 THEN 'High delays'
+            ELSE 'Not found'
+        END AS payment_delay_band,
+        customer_id
+    FROM customers
+)
+SELECT ROUND(AVG(churn) * 100, 1) AS churn_rate,
+    s.support_calls_band,
+    u.usage_frequency_band,
+    p.payment_delay_band
+FROM s_calls s
+JOIN p_delays p USING (customer_id)
+JOIN u_frequency u USING (customer_id)
+GROUP BY s.support_calls_band,
+    u.usage_frequency_band,
+    p.payment_delay_band
+ORDER BY churn_rate;
+
+
+
