@@ -47,3 +47,23 @@ GROUP BY usage_bands, support_bands, delay_bands;
 The team believes monthly contracts churn more frequently.
 Compare churn rates by contract length within each tenure band (for example, 0–12, 13–24, 25–36, 37+ months).
 Does the contract pattern persist across tenure groups?
+*/
+
+WITH tenure_bands AS (
+    SELECT
+        CASE WHEN tenure BETWEEN 0 AND 12 THEN '0-12 months'
+            WHEN tenure BETWEEN 13 AND 24 THEN '13-24 months'
+            WHEN tenure BETWEEN 25 AND 36 THEN '25-36 months'
+            WHEN tenure >= 37 THEN '37+ months'
+            ELSE 'Not found'
+        END AS tenure_band,
+        churn,
+        contract_length
+    FROM customers
+)
+SELECT tenure_band,
+    contract_length,
+    TO_CHAR(ROUND(AVG(churn) * 100, 1), 'FM99.0%') AS "Churn rate"
+FROM tenure_bands
+GROUP BY tenure_band, contract_length
+ORDER BY contract_length, tenure_band;
