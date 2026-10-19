@@ -67,3 +67,21 @@ SELECT tenure_band,
 FROM tenure_bands
 GROUP BY tenure_band, contract_length
 ORDER BY contract_length, tenure_band;
+
+/* Quantify the spending associated with churn
+Calculate the total spend associated with churned customers, their average spend, and their share of total recorded customer spend.
+Break the results down by subscription type and contract length.
+*/
+
+SELECT ROUND(AVG(total_spend), 2) AS average_spend,
+    TO_CHAR(SUM(total_spend), 'FM999,999,999') AS total_spend,
+    -- optional add sign to the above formatting depending on currency
+    subscription_type,
+    contract_length
+FROM (
+    SELECT *
+    FROM customers
+    WHERE churn = 1
+)
+GROUP BY subscription_type, contract_length
+ORDER BY subscription_type, contract_length;
