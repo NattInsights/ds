@@ -111,6 +111,7 @@ u_frequency AS (
             WHEN usage_frequency >= 21 THEN 'High Frequency'
             ELSE 'Not found'
         END AS usage_frequency_band,
+        churn,
         customer_id
     FROM customers
 ),
@@ -125,7 +126,7 @@ p_delays AS (
         customer_id
     FROM customers
 )
-SELECT ROUND(AVG(churn) * 100, 1) AS churn_rate,
+SELECT ROUND(AVG(s.churn) * 100, 1) AS churn_rate,
     s.support_calls_band,
     u.usage_frequency_band,
     p.payment_delay_band
@@ -136,6 +137,6 @@ GROUP BY s.support_calls_band,
     u.usage_frequency_band,
     p.payment_delay_band
 ORDER BY churn_rate;
-
+-- implementation still a bit iffy here
 
 
