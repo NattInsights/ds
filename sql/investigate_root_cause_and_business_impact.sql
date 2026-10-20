@@ -91,52 +91,58 @@ Compare churn rates across customer groups defined by support calls, usage frequ
 Rank the resulting segments by their difference in churn rate from the overall baseline.
 */
 
-WITH s_calls AS (
+ -- Compute baseline churn rate
+WITH baseline AS (
+    SELECT AVG(churn) AS baseline_churn
+    FROM customers
+),
+-- 2. Build behavioural bands
+bands AS (
     SELECT
-        CASE WHEN support_calls BETWEEN 0 AND 2 THEN 'Very Low calls'
+        customer_id,
+        churn,
+
+        CASE 
+            WHEN support_calls BETWEEN 0 AND 2 THEN 'Very Low calls'
             WHEN support_calls BETWEEN 3 AND 4 THEN 'Low calls'
             WHEN support_calls BETWEEN 5 AND 6 THEN 'Moderate calls'
             WHEN support_calls >= 7 THEN 'High calls'
-            ELSE 'Not found'
         END AS support_calls_band,
-        churn,
-        customer_id
-    FROM customers
-),
-u_frequency AS (
-    SELECT
-        CASE WHEN usage_frequency BETWEEN 0 AND 5 THEN 'Very Low Frequency'
-            WHEN usage_frequency BETWEEN 6 AND 12 THEN 'Low Frequency'
-            WHEN usage_frequency BETWEEN 13 AND 20 THEN 'Moderate Frequency'
-            WHEN usage_frequency >= 21 THEN 'High Frequency'
-            ELSE 'Not found'
+
+        CASE 
+            WHEN usage_frequency BETWEEN 0 AND 5 THEN 'Very Low frequency'
+            WHEN usage_frequency BETWEEN 6 AND 12 THEN 'Low frequency'
+            WHEN usage_frequency BETWEEN 13 AND 20 THEN 'Moderate frequency'
+            WHEN usage_frequency >= 21 THEN 'High frequency'
         END AS usage_frequency_band,
-        churn,
-        customer_id
-    FROM customers
-),
-p_delays AS (
-    SELECT
-        CASE WHEN payment_delay BETWEEN 0 AND 5 THEN 'Very Low delays'
+
+        CASE 
+            WHEN payment_delay BETWEEN 0 AND 5 THEN 'Very Low delays'
             WHEN payment_delay BETWEEN 6 AND 12 THEN 'Low delays'
             WHEN payment_delay BETWEEN 13 AND 20 THEN 'Moderate delays'
             WHEN payment_delay >= 21 THEN 'High delays'
-            ELSE 'Not found'
-        END AS payment_delay_band,
-        customer_id
-    FROM customers
+        END AS payment_delay_band
+),
+-- 3. Compute churn rate per segment
+segment_churn AS (
+    SELECT
+        support_calls_band,
+        usage_frequency_band,
+        payment_delay_band
+        ROUND(AVG(churn) * 100, 2) AS churn_rate
+    FROM bands
+    GROUP BY
+        support_calls_band,
+        usage_frequency_band,
+        payment_delay_band,
 )
-SELECT ROUND(AVG(s.churn) * 100, 1) AS churn_rate,
-    s.support_calls_band,
-    u.usage_frequency_band,
-    p.payment_delay_band
-FROM s_calls s
-JOIN p_delays p USING (customer_id)
-JOIN u_frequency u USING (customer_id)
-GROUP BY s.support_calls_band,
-    u.usage_frequency_band,
-    p.payment_delay_band
-ORDER BY churn_rate;
+-- 4. Rank segments by churn lift
+SELECT
+    s.*,
+    ROUND(s.churn_rate - (b.baseline_churn * 100), 2) AS churn_lift
+FROM segment_churn s
+CROSS JOIN baseline b
+ORDER BY churn_lift DESC;
 -- implementation still a bit iffy here
 
 
