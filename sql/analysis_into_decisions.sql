@@ -19,28 +19,37 @@ WITH rule_based_segments AS (
         CASE WHEN usage_frequency BETWEEN 0 AND 5 THEN 0
             WHEN usage_frequency BETWEEN 6 AND 12 THEN 1
             WHEN usage_frequency BETWEEN 13 AND 20 THEN 2
-            WHEN usage_frequency BETWEEN 21 AND 30 THEN 3
+            WHEN usage_frequency BETWEEN 21 AND 30 THEN 4
         END AS usage_score,
+
         churn,
-        total_spend
+        total_spend,
+        customer_id
         FROM customers
 ),
 risk_scores AS (
     SELECT
-        (support_score +
-        payment_score +
-        usage_score) AS total_risk_score
+        customer_id,
+        (support_score + payment_score + usage_score) AS total_risk_score
     FROM rule_based_segments
-)
-/*risk_segments AS (
+),
+risk_segments AS (
     SELECT
-
-)*/
-SELECT total_risk_score,
-    COUNT(*),
-    ROUND(AVG(churn) * 100, 2) AS churn_rate,
-    AVG(total_spend) AS avg_total_spend
-FROM risk_scores
-CROSS JOIN rule_based_segments
-GROUP BY total_risk_score;
+        customer_id,
+        total_risk_score,
+        CASE WHEN total_risk_score BETWEEN 0 AND 3 THEN 'Low Risk'
+            WHEN total_risk_score BETWEEN 4 AND 6 THEN 'Medium Risk'
+            WHEN total_risk_score BETWEEN 7 AND 10 THEN 'High Risk'
+        END AS risk_classification
+    FROM risk_scores
+)
+SELECT rs.total_risk_score,
+    rs.risk_classification,
+    COUNT(*) AS customer_count,
+    ROUND(AVG(rbs.churn) * 100, 2) AS churn_rate,
+    ROUND(AVG(rbs.total_spend), 1) AS avg_total_spend
+FROM risk_segments rs
+JOIN rule_based_segments rbs USING (customer_id)
+GROUP BY rs.total_risk_score, rs.risk_classification
+ORDER BY rs.total_risk_score;
 
