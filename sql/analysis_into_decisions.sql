@@ -20,16 +20,27 @@ WITH rule_based_segments AS (
             WHEN usage_frequency BETWEEN 6 AND 12 THEN 1
             WHEN usage_frequency BETWEEN 13 AND 20 THEN 2
             WHEN usage_frequency BETWEEN 21 AND 30 THEN 3
-        END AS usage_score
+        END AS usage_score,
+        churn,
+        total_spend
         FROM customers
 ),
-risk_score AS (
+risk_scores AS (
     SELECT
-        support_score,
-        payment_score,
-        usage_score
+        (support_score +
+        payment_score +
+        usage_score) AS total_risk_score
     FROM rule_based_segments
 )
-SELECT *
-FROM risk_score;
+/*risk_segments AS (
+    SELECT
+
+)*/
+SELECT total_risk_score,
+    COUNT(*),
+    ROUND(AVG(churn) * 100, 2) AS churn_rate,
+    AVG(total_spend) AS avg_total_spend
+FROM risk_scores
+CROSS JOIN rule_based_segments
+GROUP BY total_risk_score;
 
