@@ -53,3 +53,23 @@ JOIN rule_based_segments rbs USING (customer_id)
 GROUP BY rs.total_risk_score, rs.risk_classification
 ORDER BY rs.total_risk_score;
 
+/* Estimate the opporrtunity from reducing churn
+Suppose the business wants to reduce its overall churn rate by 10% relative to the current rate.
+Calculate how many fewer churned customers this represents, assuming the customer base stays constant.
+Then estimate the recorded spend associated with that number of customers using the average spend of churned customers.
+*/
+
+SELECT ROUND(AVG(churn) * 100, 2) AS churn_rate,
+    -- dropping by 10%
+    (ROUND(AVG(churn) * 100, 2) - 10) AS reduced_churn_rate,
+    (COUNT(*) * 0.47) AS churned_customer_count,
+    (COUNT(*) * 0.37) AS reduced_churn_customers,
+    (COUNT(*) * 0.47 - COUNT(*) * 0.37) AS customers_saved
+FROM customers;
+
+SELECT (COUNT(*) - (COUNT(*) * 0.37)) AS total_customers_after,
+    total_spend
+FROM (SELECT *
+    FROM customers
+    WHERE churn = 0);
+
