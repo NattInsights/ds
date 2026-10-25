@@ -97,28 +97,60 @@ FROM final;
 Identify customer segments that have all three characteristics: an above-average churn rate, a meaningful number of customers, and above-average total spend.
 Rank the segments using a clearly defined prioritisation metric and recommend which three the retention team should investigate first.
 */
-WITH criteria AS (
+WITH benchmarks AS (
     SELECT
-        ROUND(AVG(churn) * 100, 2) AS churn_rate,
-        AVG(churn) * 100 AS avg_churn_rate,
-        COUNT(*) AS customer_count,
-        AVG(total_spend) AS avg_total_spend,
-        customer_id,
-        total_spend
+        ROUND(AVG(churn) * 100, 2) AS baseline_churn,
+        ROUND(AVG(total_spend), 2) AS baseline_spend
     FROM customers
-),
+), 
 segments AS (
     SELECT
-        CASE WHEN churn_rate > avg_churn_rate THEN 'Above avg churn' END AS churn_segment,
+        customer_id,
+        churn,
+        total_spend,
 
-        CASE WHEN customer_count >= 
-            PERCENTILE_CONT(0.5) WITHIN GROUP 
-                (ORDER BY customer_count) THEN 'Meaningful customer count'
-        END AS meaningful_customer_count,
+        CASE WHEN support_calls BETWEEN 0 AND 2 THEN 'Very Low'
+            WHEN support_calls BETWEEN 3 AND 4 THEN 'Low'
+            WHEN support_calls BETWEEN 5 AND 6 THEN 'Moderate'
+            ELSE 'High'
+        END AS support_calls_band,
 
-        CASE WHEN total_spend > avg_total_spend THEN 'High total spend' END AS meaningful_total_spend
-    FROM criteria
+        CASE WHEN usage_frequency BETWEEN 0 AND 5 THEN 'Very Low'
+            WHEN usage_frequency BETWEEN 6 AND 12 THEN 'Low'
+            WHEN usage_frequency BETWEEN 13 AND 20 THEN 'Moderate'
+            ELSE 'High'
+        END AS usage_band,
+
+        CASE WHEN payment_delay BETWEEN 0 AND 5 THEN 'Very Low'
+             WHEN payment_delay BETWEEN 6 AND 12 THEN 'Low'
+             WHEN payment_delay BETWEEN 13 AND 20 THEN 'Moderate'
+             ELSE 'High'
+        END AS delay_band
+    FROM customers
+),
+segment_metrics AS (
+    SELECT
+        support_calls_band,
+        usage_band,
+        delay_band,
+
+        COUNT(*) AS customer_count,
+        AVG(churn) * 100 AS churn_rate,
+        AVG(total_spend) AS avg_spend
+    FROM segments
+    GROUP BY
+        support_calls_band,
+        usage_band,
+        delay_band
+),
+scored AS (
+    SELECT
+        sm.*,
+        
+    FROM segment_metrics sm
+    CROSS JOIN benchmarks b
 )
 SELECT *
-FROM segments
-GROUP BY customer_id;
+FROM scored
+ORDER BY churn_rate DESC
+LIMIT 10;
