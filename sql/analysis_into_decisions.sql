@@ -97,4 +97,28 @@ FROM final;
 Identify customer segments that have all three characteristics: an above-average churn rate, a meaningful number of customers, and above-average total spend.
 Rank the segments using a clearly defined prioritisation metric and recommend which three the retention team should investigate first.
 */
+WITH criteria AS (
+    SELECT
+        ROUND(AVG(churn) * 100, 2) AS churn_rate,
+        AVG(churn) * 100 AS avg_churn_rate,
+        COUNT(*) AS customer_count,
+        AVG(total_spend) AS avg_total_spend,
+        customer_id,
+        total_spend
+    FROM customers
+),
+segments AS (
+    SELECT
+        CASE WHEN churn_rate > avg_churn_rate THEN 'Above avg churn' END AS churn_segment,
 
+        CASE WHEN customer_count >= 
+            PERCENTILE_CONT(0.5) WITHIN GROUP 
+                (ORDER BY customer_count) THEN 'Meaningful customer count'
+        END AS meaningful_customer_count,
+
+        CASE WHEN total_spend > avg_total_spend THEN 'High total spend' END AS meaningful_total_spend
+    FROM criteria
+)
+SELECT *
+FROM segments
+GROUP BY customer_id;
