@@ -93,3 +93,8 @@ final AS (
 SELECT *
 FROM final;
 
+/* Finding the highest priority retention segments
+Identify customer segments that have all three characteristics: an above-average churn rate, a meaningful number of customers, and above-average total spend.
+Rank the segments using a clearly defined prioritisation metric and recommend which three the retention team should investigate first.
+*/
+
