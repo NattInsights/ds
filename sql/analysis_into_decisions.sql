@@ -59,17 +59,37 @@ Calculate how many fewer churned customers this represents, assuming the custome
 Then estimate the recorded spend associated with that number of customers using the average spend of churned customers.
 */
 
-SELECT ROUND(AVG(churn) * 100, 2) AS churn_rate,
-    -- dropping by 10%
-    (ROUND(AVG(churn) * 100, 2) - 10) AS reduced_churn_rate,
-    (COUNT(*) * 0.47) AS churned_customer_count,
-    (COUNT(*) * 0.37) AS reduced_churn_customers,
-    (COUNT(*) * 0.47 - COUNT(*) * 0.37) AS customers_saved
-FROM customers;
-
-SELECT (COUNT(*) - (COUNT(*) * 0.37)) AS total_customers_after,
-    total_spend
-FROM (SELECT *
+WITH base AS (
+    SELECT 
+        COUNT(*) AS total_customers,
+        SUM(CASE WHEN churn = 1 THEN 1 ELSE 0 END) AS churned_customers,
+        -- very clean average total spend for churned below
+        ROUND(AVG(CASE WHEN churn = 1 THEN total_spend END), 2) AS avg_spend_churned
     FROM customers
-    WHERE churn = 0);
+),
+calc AS (
+    SELECT
+        total_customers,
+        churned_customers,
+        avg_spend_churned,
+        -- current churn rate
+        ROUND(churned_customers::decimal / total_customers, 4) AS churn_rate,
+        -- 10% relative reduction
+        ROUND((churned_customers::decimal / total_customers) * 0.9, 4) AS reduced_churn_rate
+    FROM base
+),
+final AS (
+    SELECT
+        *,
+        -- churned customers after reduction
+        ROUND(total_customers * reduced_churn_rate) AS reduced_churn_customers,
+        -- customers saved
+        churned_customers - ROUND(total_customers * reduced_churn_rate) AS customers_saved,
+        -- spend saved
+        ROUND((churned_customers - (total_customers * reduced_churn_rate)) * avg_spend_churned, 2)
+            AS est_spend_saved
+    FROM calc
+)
+SELECT *
+FROM final;
 
