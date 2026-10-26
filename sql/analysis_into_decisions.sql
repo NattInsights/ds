@@ -143,14 +143,33 @@ segment_metrics AS (
         usage_band,
         delay_band
 ),
+segment_averages AS (
+    SELECT AVG(customer_count) AS avg_segment_count
+    FROM segment_metrics
+),
 scored AS (
     SELECT
-        sm.*,
-        
+        sm.support_calls_band,
+        sm.usage_band,
+        sm.delay_band,
+        sm.customer_count,
+        sm.churn_rate,
+        sm.avg_spend,
+
+        CASE WHEN sm.churn_rate > b.baseline_churn THEN 1 ELSE 0 END AS sig_churn,
+        CASE WHEN sm.customer_count > sa.avg_segment_count THEN 1 ELSE 0 END AS sig_count,
+        CASE WHEN sm.avg_spend > b.baseline_spend THEN 1 ELSE 0 END AS sig_spend,
+        -- total severity score
+        (CASE WHEN sm.churn_rate > b.baseline_churn THEN 1 ELSE 0 END +
+         CASE WHEN sm.customer_count > sa.avg_segment_count THEN 1 ELSE 0 END +
+         CASE WHEN sm.avg_spend > b.baseline_spend THEN 1 ELSE 0 END) AS severity_total
+
     FROM segment_metrics sm
     CROSS JOIN benchmarks b
+    CROSS JOIN segment_averages sa
 )
 SELECT *
 FROM scored
 ORDER BY churn_rate DESC
-LIMIT 10;
+LIMIT 20;
+
