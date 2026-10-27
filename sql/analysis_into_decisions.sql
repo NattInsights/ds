@@ -179,26 +179,27 @@ Repeat the comparison for customers with higher usage frequency.
 Does support-call volume appear to be associated with churn differently depending on engagement?
 */
 
-WITH calls_split AS (
+WITH customer_segments AS (
     SELECT
-        CASE WHEN support_calls >= 5 THEN 'High calls'
-            WHEN support_calls < 5 THEN 'Low calls'
-            ELSE 'No usage recorded'
-        END AS calls,
+        CASE
+            WHEN support_calls >= 5 THEN 'High calls'
+            ELSE 'Low calls'
+        END AS call_segment,
+
+        CASE
+            WHEN usage_frequency >= 15 THEN 'High usage'
+            ELSE 'Low usage'
+        END AS usage_segment,
+
         churn
     FROM customers
-),
-usage_split AS (
-    SELECT
-        CASE WHEN usage_frequency >= 15 THEN 'High usage'
-            WHEN usage_frequency < 15 THEN 'Low usage'
-            ELSE 'No usage recorded'
-        END AS usage
-    FROM customers
 )
-SELECT us.usage,
-    ROUND(AVG(churn) * 100, 2) AS avg_churn
-FROM calls_split cs
-CROSS JOIN usage_split us
-GROUP BY us.usage;
+
+SELECT
+    usage_segment,
+    call_segment,
+    ROUND(AVG(churn) * 100, 2) AS churn_rate
+FROM customer_segments
+GROUP BY usage_segment, call_segment
+ORDER BY usage_segment, call_segment;
 
