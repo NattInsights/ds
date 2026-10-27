@@ -201,5 +201,7 @@ SELECT
     ROUND(AVG(churn) * 100, 2) AS churn_rate
 FROM customer_segments
 GROUP BY usage_segment, call_segment
-ORDER BY usage_segment, call_segment;
+ORDER BY churn_rate DESC;
+
+
 
